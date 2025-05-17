@@ -1,0 +1,36 @@
+var express = require('express');
+var router = express.Router();
+
+const Pusher = require('pusher');
+const pusher = new Pusher({
+  appId: process.env.PUSHER_APPID,
+  key: process.env.PUSHER_KEY,
+  secret: process.env.PUSHER_SECRET,
+  cluster: process.env.PUSHER_CLUSTER,
+  useTLS: true,
+});
+
+router.put('/users/:username', (req, res) => {
+  pusher.trigger('chat', 'join', {
+    username: req.params.username,
+    type: 'join',
+  });
+  res.json({ result: true });
+});
+
+router.delete('/users/:username', (req, res) => {
+  pusher.trigger('chat', 'leave', {
+    username: req.params.username,
+    type: 'leave',
+  });
+  res.json({ result: true });
+});
+
+// Send message
+router.post('/message', (req, res) => {
+  pusher.trigger('chat', 'message', req.body);
+  console.log(req.body)
+  res.json({ result: true, message: req.body });
+});
+
+module.exports = router;
